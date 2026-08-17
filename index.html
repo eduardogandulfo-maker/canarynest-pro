@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CanaryNest Pro</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="css/app.css">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">🕊️</div>
+    <h1>CanaryNest Pro</h1>
+    <p>Gestión profesional de criadero de canarios</p>
+    <button class="btn-login" onclick="netlifyIdentity.open()">
+      <i class="ti ti-login"></i> Ingresar / Registrarse
+    </button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none; width:100%; min-height:100vh; display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo-icon">🕊️</div>
+      <div class="logo-name">CanaryNest</div>
+      <div class="logo-sub">Criadero Profesional</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">Principal</div>
+      <a class="nav-item active" onclick="goTo('dashboard')">
+        <i class="ti ti-home"></i> Dashboard
+      </a>
+      <a class="nav-item" onclick="goTo('aves')">
+        <i class="ti ti-feather"></i> Mis Aves
+      </a>
+      <a class="nav-item" onclick="goTo('jaulas')">
+        <i class="ti ti-cage"></i> Jaulas
+      </a>
+      <div class="nav-label">Cuidados</div>
+      <a class="nav-item" onclick="goTo('medicamentos')">
+        <i class="ti ti-pill"></i> Medicamentos
+      </a>
+      <a class="nav-item" onclick="goTo('sanitario')">
+        <i class="ti ti-calendar-check"></i> Plan Sanitario
+      </a>
+      <a class="nav-item" onclick="goTo('rutinas')">
+        <i class="ti ti-checklist"></i> Rutinas
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info" id="user-email"></div>
+      <button class="btn-logout" onclick="netlifyIdentity.logout()">
+        <i class="ti ti-logout"></i> Salir
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1 id="page-title">Dashboard</h1>
+        <div class="sub" id="page-sub">INICIO / RESUMEN</div>
+      </div>
+      <div class="topbar-right">
+        <div class="weather-chip" id="weather-chip">
+          <i class="ti ti-sun"></i> --°C · --%
+        </div>
+        <div class="date-chip" id="date-chip"></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div id="alertas-container"></div>
+      <div class="section-title">Resumen del Criadero</div>
+      <div class="stats-grid" id="stats-grid">
+        <div class="loading"><div class="spin"></div> Cargando...</div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="ti ti-egg"></i> Jaulas Activas</div>
+            <button class="btn btn-sm btn-primary" onclick="goTo('jaulas')">Ver todas</button>
+          </div>
+          <div id="jaulas-resumen"><div class="loading"><div class="spin"></div></div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="ti ti-checklist"></i> Rutinas Pendientes</div>
+          </div>
+          <div id="rutinas-hoy"><div class="loading"><div class="spin"></div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVES -->
+    <div class="page" id="page-aves">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div class="section-title" style="margin:0; flex:1">Registro de Aves</div>
+        <button class="btn btn-primary" onclick="modalAve()"><i class="ti ti-plus"></i> Nueva Ave</button>
+      </div>
+      <div class="panel">
+        <div class="panel-header">
+          <input id="buscar-ave" placeholder="Buscar por anillo o nombre..." style="border:1px solid var(--light-gray); border-radius:7px; padding:7px 12px; font-size:13px; width:240px;">
+          <select id="filtro-sexo" style="border:1px solid var(--light-gray); border-radius:7px; padding:7px 12px; font-size:13px;" onchange="renderAves()">
+            <option value="">Todos</option>
+            <option value="Macho">Machos</option>
+            <option value="Hembra">Hembras</option>
+            <option value="Indeterminado">Indeterminado</option>
+          </select>
+        </div>
+        <div id="aves-table"><div class="loading"><div class="spin"></div></div></div>
+      </div>
+    </div>
+
+    <!-- JAULAS -->
+    <div class="page" id="page-jaulas">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div class="section-title" style="margin:0; flex:1">Jaulas de Cría</div>
+        <button class="btn btn-primary" onclick="modalJaula()"><i class="ti ti-plus"></i> Nueva Jaula</button>
+      </div>
+      <div id="jaulas-grid"><div class="loading"><div class="spin"></div></div></div>
+    </div>
+
+    <!-- MEDICAMENTOS -->
+    <div class="page" id="page-medicamentos">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div class="section-title" style="margin:0; flex:1">Stock de Medicamentos</div>
+        <button class="btn btn-primary" onclick="modalMedicamento()"><i class="ti ti-plus"></i> Agregar</button>
+      </div>
+      <div class="panel">
+        <div id="med-table"><div class="loading"><div class="spin"></div></div></div>
+      </div>
+    </div>
+
+    <!-- PLAN SANITARIO -->
+    <div class="page" id="page-sanitario">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div class="section-title" style="margin:0; flex:1">Plan Sanitario</div>
+        <button class="btn btn-primary" onclick="modalPlan()"><i class="ti ti-plus"></i> Nuevo Plan</button>
+      </div>
+      <div class="panel">
+        <div id="plan-table"><div class="loading"><div class="spin"></div></div></div>
+      </div>
+    </div>
+
+    <!-- RUTINAS -->
+    <div class="page" id="page-rutinas">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div class="section-title" style="margin:0; flex:1">Alimentación y Limpieza</div>
+        <button class="btn btn-primary" onclick="modalRutina()"><i class="ti ti-plus"></i> Nueva Tarea</button>
+      </div>
+      <div class="panel">
+        <div id="rutinas-table"><div class="loading"><div class="spin"></div></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODALES -->
+<div class="modal-backdrop" id="modal-ave">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-ave-title">Nueva Ave</div>
+      <button class="btn btn-sm btn-secondary" onclick="closeModal('modal-ave')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ave-id">
+      <div class="field"><label>Nro de Anillo</label><input id="ave-anillo" placeholder="ARG-2025-001"></div>
+      <div class="field"><label>Nombre / Apodo</label><input id="ave-nombre" placeholder="Opcional"></div>
+      <div class="field"><label>Sexo</label>
+        <select id="ave-sexo">
+          <option value="Macho">Macho</option>
+          <option value="Hembra">Hembra</option>
+          <option value="Indeterminado">Indeterminado</option>
+        </select>
+      </div>
+      <div class="field"><label>Fecha de Nacimiento</label><input type="date" id="ave-nacimiento"></div>
+      <div class="field"><label>Tipo de Canario</label>
+        <select id="ave-tipo">
+          <option value="Postura">Postura</option>
+          <option value="Canto">Canto</option>
+          <option value="Color">Color</option>
+          <option value="Porte">Porte</option>
+        </select>
+      </div>
+      <div class="field"><label>Procedencia</label>
+        <select id="ave-procedencia">
+          <option value="Propio">Propio</option>
+          <option value="Comprado">Comprado</option>
+          <option value="Cedido">Cedido</option>
+          <option value="Importado">Importado</option>
+        </select>
+      </div>
+      <div class="field"><label>Estado</label>
+        <select id="ave-estado">
+          <option value="Activo">Activo</option>
+          <option value="Vendido">Vendido</option>
+          <option value="Muerto">Muerto</option>
+          <option value="Cedido">Cedido</option>
+          <option value="Retirado">Retirado</option>
+        </select>
+      </div>
+      <div class="field"><label>Observaciones</label><textarea id="ave-obs" rows="3"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-ave')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarAve()"><i class="ti ti-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-jaula">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva Jaula de Cría</div>
+      <button class="btn btn-sm btn-secondary" onclick="closeModal('modal-jaula')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="jaula-id">
+      <div class="field"><label>Nro de Jaula Física</label><input id="jaula-nro" placeholder="Ej: A1, B3"></div>
+      <div class="field"><label>Temporada</label><input id="jaula-temporada" value="2025"></div>
+      <div class="field"><label>Nro de Puesta</label>
+        <select id="jaula-puesta">
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+        </select>
+      </div>
+      <div class="field"><label>Estado</label>
+        <select id="jaula-estado">
+          <option value="Vacía">Vacía</option>
+          <option value="Armando nido">Armando nido</option>
+          <option value="Postura">Postura</option>
+          <option value="Incubando">Incubando</option>
+          <option value="Con pichones">Con pichones</option>
+          <option value="Cerrada">Cerrada</option>
+        </select>
+      </div>
+      <div class="field"><label>Fecha 1er Huevo</label><input type="date" id="jaula-1er-huevo"></div>
+      <div class="field"><label>Fecha Inicio Incubación</label><input type="date" id="jaula-incubacion"></div>
+      <div class="field"><label>Cantidad de Huevos</label><input type="number" id="jaula-huevos" min="0" max="10"></div>
+      <div class="field"><label>Huevos Gallados</label><input type="number" id="jaula-gallados" min="0" max="10"></div>
+      <div class="field"><label>Observaciones</label><textarea id="jaula-obs" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-jaula')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarJaula()"><i class="ti ti-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-medicamento">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Medicamento</div>
+      <button class="btn btn-sm btn-secondary" onclick="closeModal('modal-medicamento')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="med-id">
+      <div class="field"><label>Nombre</label><input id="med-nombre"></div>
+      <div class="field"><label>Laboratorio</label><input id="med-lab"></div>
+      <div class="field"><label>Principio Activo</label><input id="med-activo"></div>
+      <div class="field"><label>Categoría</label>
+        <select id="med-cat">
+          <option>Antibiótico</option><option>Antiparasitario</option>
+          <option>Vitamina</option><option>Mineral</option>
+          <option>Antifúngico</option><option>Antiprotozoario</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="field"><label>Dosis</label><input id="med-dosis" placeholder="Ej: 0.5 ml"></div>
+      <div class="field"><label>Unidad de Dosis</label>
+        <select id="med-unidad-dosis">
+          <option>ml/L agua</option><option>mg/L agua</option>
+          <option>gotas/ave</option><option>mg/kg</option><option>otro</option>
+        </select>
+      </div>
+      <div class="field"><label>Días de Tratamiento</label><input type="number" id="med-dias"></div>
+      <div class="field"><label>Vía de Administración</label>
+        <select id="med-via">
+          <option>Oral</option><option>Tópico</option><option>Inyectable</option><option>Ambiental</option>
+        </select>
+      </div>
+      <div class="field"><label>Stock Inicial</label><input type="number" id="med-stock-ini"></div>
+      <div class="field"><label>Stock Actual</label><input type="number" id="med-stock-act"></div>
+      <div class="field"><label>Unidad de Stock</label>
+        <select id="med-unidad-stock">
+          <option>ml</option><option>mg</option><option>comprimidos</option><option>sobres</option><option>unidades</option>
+        </select>
+      </div>
+      <div class="field"><label>Fecha de Vencimiento</label><input type="date" id="med-vencimiento"></div>
+      <div class="field"><label>Indicaciones</label><textarea id="med-indicaciones" rows="2"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-medicamento')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarMedicamento()"><i class="ti ti-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-rutina">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nueva Tarea de Rutina</div>
+      <button class="btn btn-sm btn-secondary" onclick="closeModal('modal-rutina')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="rutina-id">
+      <div class="field"><label>Descripción</label><input id="rutina-desc" placeholder="Ej: Renovar agua bebederos"></div>
+      <div class="field"><label>Tipo</label>
+        <select id="rutina-tipo">
+          <option>Alimento</option><option>Agua</option><option>Limpieza jaula</option>
+          <option>Desinfección</option><option>Limpieza sala</option><option>Otro</option>
+        </select>
+      </div>
+      <div class="field"><label>Aplicación</label>
+        <select id="rutina-nivel">
+          <option>Todas las jaulas</option><option>Grupo</option><option>Jaula específica</option>
+        </select>
+      </div>
+      <div class="field"><label>Frecuencia</label>
+        <select id="rutina-frecuencia">
+          <option>Diaria</option><option>Cada N días</option><option>Semanal</option>
+          <option>Quincenal</option><option>Mensual</option>
+        </select>
+      </div>
+      <div class="field"><label>Intervalo (días)</label><input type="number" id="rutina-intervalo" value="1" min="1"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-rutina')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarRutina()"><i class="ti ti-check"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
